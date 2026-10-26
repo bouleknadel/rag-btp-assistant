@@ -16,6 +16,13 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+# Les tests d'intégration (vrais modèles) sont exclus par défaut :
+# les lancer avec `pytest -m integration`.
+addopts = "-m 'not integration'"
+filterwarnings = [
+    # Avertissement interne à chromadb (Python 3.14), sans impact sur le projet.
+    "ignore:'asyncio.iscoroutinefunction' is deprecated:DeprecationWarning",
+]
 markers = [
     "integration: tests nécessitant les modèles locaux (embeddings / reranker)",
 ]
