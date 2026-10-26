@@ -45,9 +45,9 @@ def main() -> None:
 
     if args.query:
         print(f"\nRecherche : {args.query!r}")
-        results = store.similarity_search_with_relevance_scores(args.query, k=3)
-        for rank, (doc, score) in enumerate(results, start=1):
-            print(f"\n#{rank}  score={score:.3f}  {doc.metadata['source']}")
+        results = store.similarity_search_with_score(args.query, k=3)
+        for rank, (doc, distance) in enumerate(results, start=1):
+            print(f"\n#{rank}  score={1 - distance:.3f}  {doc.metadata['source']}")
             print("   " + doc.page_content[:250].replace("\n", " ") + "…")
 
 
