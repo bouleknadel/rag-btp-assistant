@@ -1,0 +1,28 @@
+# Fiche technique — Étanchéité de la toiture-terrasse inaccessible
+
+Chantier : Résidence Les Tilleuls
+Lot : n° 04, Étanchéité
+Entreprise : Étanchéité Rhône-Alpes (ERA)
+Surface : 1 080 m² de toiture-terrasse inaccessible avec protection gravillons
+
+## Complexe d'étanchéité
+
+- Support : dalle béton armé, pente de 1,5 % vers les évacuations d'eaux pluviales.
+- Pare-vapeur : feuille bitumineuse aluminium soudée.
+- Isolant : panneaux de polyuréthane (PIR) de 120 mm, λ = 0,022 W/(m·K), R = 5,45 m²·K/W.
+- Revêtement : bicouche en bitume élastomère SBS (première couche fixée mécaniquement,
+  seconde couche soudée en plein).
+- Protection : gravillons roulés 5/15, épaisseur 4 cm minimum.
+
+## Points singuliers
+
+- Relevés d'étanchéité : hauteur minimale de 15 cm au-dessus de la protection.
+- Évacuations des eaux pluviales : 6 naissances EP de diamètre 100 mm
+  et 2 trop-pleins.
+- Joint de dilatation traité par un profilé spécifique avec soufflet.
+
+## Contrôles
+
+- Essai d'étanchéité par mise en eau pendant 48 heures avant pose de la protection,
+  sur la totalité de la surface, avec procès-verbal signé par l'entreprise et le maître d'œuvre.
+- Garantie décennale et garantie produit de 10 ans du fabricant de membranes.

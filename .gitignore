@@ -25,6 +25,7 @@ htmlcov/
 
 # Données générées localement (index vectoriel, caches de modèles)
 data/chroma/
+data/raw/generated/
 data/inbox/
 .cache/
 
