@@ -1,0 +1,9 @@
+-r requirements.txt
+
+# Tests & qualité de code
+pytest>=9.1,<10
+httpx>=0.28,<1
+ruff>=0.17,<1
+
+# Génération du corpus synthétique de démo (PDF)
+reportlab>=5.1,<6

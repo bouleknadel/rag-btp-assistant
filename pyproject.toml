@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-btp"
+version = "0.1.0"
+description = "Assistant RAG pour l'exploitation de documents techniques de chantiers BTP"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Abderrahmane Bouleknadel" }]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "integration: tests nécessitant les modèles locaux (embeddings / reranker)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]

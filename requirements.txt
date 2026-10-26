@@ -1,0 +1,33 @@
+# --- Orchestration LLM -------------------------------------------------------
+langchain>=1.4,<2
+langchain-core>=1.7,<2
+langchain-community>=0.4,<1
+langchain-text-splitters>=1.1,<2
+langgraph>=1.2,<2
+
+# --- Fournisseurs LLM (Groq par défaut, OpenAI / Gemini en fallback) ---------
+langchain-groq>=1.1,<2
+langchain-openai>=1.7,<2
+langchain-google-genai>=4.4,<5
+
+# --- Embeddings, reranking & vector store ------------------------------------
+langchain-huggingface>=1.2,<2
+sentence-transformers>=6.2,<7
+langchain-chroma>=1.1,<2
+chromadb>=1.5,<2
+
+# --- Chargement de documents --------------------------------------------------
+pypdf>=6.21,<7
+
+# --- API ----------------------------------------------------------------------
+fastapi>=0.162,<1
+uvicorn[standard]>=0.54,<1
+python-multipart>=0.0.32
+pydantic>=2.14,<3
+pydantic-settings>=2.16,<3
+
+# --- Observabilité & évaluation ----------------------------------------------
+langsmith>=0.14,<1
+
+# --- Configuration ------------------------------------------------------------
+python-dotenv>=1.2,<2
