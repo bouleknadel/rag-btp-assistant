@@ -38,16 +38,25 @@ class Settings(BaseSettings):
         default_factory=lambda: ["openai", "gemini"]
     )
     llm_temperature: float = 0.1
+    llm_timeout: float = 120.0
+    llm_max_retries: int = 2
 
     groq_api_key: SecretStr | None = None
-    groq_model: str = "llama-3.3-70b-versatile"
+    # Llama 3.3 70B a été retiré de l'offre gratuite de Groq le 16/08/2026 :
+    # gpt-oss-120b (open-weight) est le remplaçant recommandé par Groq.
+    groq_model: str = "openai/gpt-oss-120b"
+    # Effort de raisonnement des modèles gpt-oss (low, medium, high).
+    groq_reasoning_effort: Literal["low", "medium", "high"] = "low"
     openai_api_key: SecretStr | None = None
     openai_model: str = "gpt-4o-mini"
     # Accepte les deux noms usuels de la clé Gemini.
     google_api_key: SecretStr | None = Field(
         default=None, validation_alias=AliasChoices("GOOGLE_API_KEY", "GEMINI_API_KEY")
     )
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-3.8-flash"
+    # Niveau de « réflexion » des modèles Gemini 3+ (minimal, low, medium, high).
+    # « low » suffit pour nos tâches et évite des réponses de plus d'une minute.
+    gemini_thinking_level: Literal["minimal", "low", "medium", "high"] = "low"
 
     # --- Embeddings & reranking ----------------------------------------------
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -63,6 +72,10 @@ class Settings(BaseSettings):
     chunk_overlap: int = 120
     retrieval_top_k: int = 20
     rerank_top_n: int = 5
+
+    # --- Graphe RAG ---------------------------------------------------------------
+    # Nombre maximal de reformulations de la question si aucun document n'est pertinent.
+    max_query_rewrites: int = 1
 
     # --- LangSmith --------------------------------------------------------------
     langsmith_tracing: bool = False

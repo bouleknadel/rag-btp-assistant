@@ -22,6 +22,8 @@ addopts = "-m 'not integration'"
 filterwarnings = [
     # Avertissement interne à chromadb (Python 3.14), sans impact sur le projet.
     "ignore:'asyncio.iscoroutinefunction' is deprecated:DeprecationWarning",
+    # Avertissement interne à google-genai (Python 3.14), sans impact sur le projet.
+    "ignore:'_UnionGenericAlias' is deprecated:DeprecationWarning",
 ]
 markers = [
     "integration: tests nécessitant les modèles locaux (embeddings / reranker)",
