@@ -1,0 +1,373 @@
+{
+  "name": "RAG BTP — Ingestion automatique des documents de chantier",
+  "nodes": [
+    {
+      "id": "1b0e6a4e-0001-4c3e-9a7a-000000000001",
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "/data/inbox",
+        "events": [
+          "add",
+          "change"
+        ],
+        "options": {
+          "awaitWriteFinish": true,
+          "usePolling": true,
+          "ignored": "**/{.*,~$*,*.tmp,*.crdownload}"
+        }
+      },
+      "name": "Nouveau document",
+      "type": "n8n-nodes-base.localFileTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Surveille le dossier d'arrivée (data/inbox). Polling activé : nécessaire avec Docker sous Windows/macOS."
+    },
+    {
+      "id": "1b0e6a4e-0002-4c3e-9a7a-000000000002",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-api",
+              "name": "api_url",
+              "value": "http://host.docker.internal:8000",
+              "type": "string"
+            },
+            {
+              "id": "cfg-hook",
+              "name": "notify_webhook_url",
+              "value": "https://webhook.site/remplacer-par-votre-url",
+              "type": "string"
+            },
+            {
+              "id": "cfg-ext",
+              "name": "extensions",
+              "value": "pdf,md,txt",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "name": "Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ],
+      "notes": "À adapter : URL de l'API RAG et URL du webhook de notification (Slack, Discord, Teams ou webhook.site pour tester)."
+    },
+    {
+      "id": "1b0e6a4e-0003-4c3e-9a7a-000000000003",
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-ext",
+              "leftValue": "={{ $json.extensions.split(',').includes($json.path.split('.').pop().toLowerCase()) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Format supporté ?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "id": "1b0e6a4e-0004-4c3e-9a7a-000000000004",
+      "parameters": {
+        "fileSelector": "={{ $json.path }}",
+        "options": {
+          "dataPropertyName": "data"
+        }
+      },
+      "name": "Lire le fichier",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "id": "1b0e6a4e-0005-4c3e-9a7a-000000000005",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').item.json.api_url }}/ingest",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "files",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "name": "Indexer (POST /ingest)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        100
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "Enregistre le fichier dans data/raw/uploads et l'indexe dans ChromaDB. Renvoyer un fichier du même nom remplace ses anciens extraits (pas de doublon)."
+    },
+    {
+      "id": "1b0e6a4e-0006-4c3e-9a7a-000000000006",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').item.json.notify_webhook_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: '✅ Document indexé : ' + $('Nouveau document').item.json.path.split(/[\\\\/]/).pop() + ' — ' + $json.chunks_upserted + ' extrait(s) ajouté(s), ' + $json.total_in_collection + ' au total dans la base.', content: '✅ Document indexé : ' + $('Nouveau document').item.json.path.split(/[\\\\/]/).pop() + ' — ' + $json.chunks_upserted + ' extrait(s) ajouté(s), ' + $json.total_in_collection + ' au total dans la base.' }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "name": "Notifier : document indexé",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "1b0e6a4e-0007-4c3e-9a7a-000000000007",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').item.json.notify_webhook_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: '❌ Échec de l\\'indexation de ' + $('Nouveau document').item.json.path.split(/[\\\\/]/).pop() + ' : ' + ($json.error?.message || JSON.stringify($json.error || $json)), content: '❌ Échec de l\\'indexation de ' + $('Nouveau document').item.json.path.split(/[\\\\/]/).pop() + ' : ' + ($json.error?.message || JSON.stringify($json.error || $json)) }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "name": "Notifier : échec d'indexation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        200
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "1b0e6a4e-0008-4c3e-9a7a-000000000008",
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-rapport",
+              "leftValue": "={{ $('Nouveau document').item.json.path.toLowerCase() }}",
+              "rightValue": "rapport",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Rapport de chantier ?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        900,
+        400
+      ],
+      "notes": "Les fichiers dont le nom contient « rapport » (ex. tilleuls__rapport_hebdo__semaine-12.pdf) sont aussi synthétisés."
+    },
+    {
+      "id": "1b0e6a4e-0009-4c3e-9a7a-000000000009",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').item.json.api_url }}/summarize/file",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "name": "Synthétiser (POST /summarize/file)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        400
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "1b0e6a4e-0010-4c3e-9a7a-000000000010",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuration').item.json.notify_webhook_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: ($json.summary ? ['📋 Synthèse de ' + $('Nouveau document').item.json.path.split(/[\\\\/]/).pop() + '', $json.summary.resume, 'Avancement : ' + ($json.summary.avancement || 'non mentionné'), 'Problèmes : ' + (($json.summary.problemes || []).join(' ; ') || 'aucun'), 'Sécurité : ' + (($json.summary.securite || []).join(' ; ') || 'rien à signaler'), 'Actions : ' + (($json.summary.actions || []).map(a => a.action + (a.echeance ? ' (' + a.echeance + ')' : '')).join(' ; ') || 'aucune')].join('\\n') : ($json.markdown || ('⚠ Synthèse indisponible : ' + JSON.stringify($json.error || $json)))), content: ($json.summary ? ['📋 Synthèse de ' + $('Nouveau document').item.json.path.split(/[\\\\/]/).pop() + '', $json.summary.resume, 'Avancement : ' + ($json.summary.avancement || 'non mentionné'), 'Problèmes : ' + (($json.summary.problemes || []).join(' ; ') || 'aucun'), 'Sécurité : ' + (($json.summary.securite || []).join(' ; ') || 'rien à signaler'), 'Actions : ' + (($json.summary.actions || []).map(a => a.action + (a.echeance ? ' (' + a.echeance + ')' : '')).join(' ; ') || 'aucune')].join('\\n') : ($json.markdown || ('⚠ Synthèse indisponible : ' + JSON.stringify($json.error || $json)))) }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "name": "Notifier : synthèse du rapport",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1380,
+        400
+      ],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Nouveau document": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Format supporté ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format supporté ?": {
+      "main": [
+        [
+          {
+            "node": "Lire le fichier",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Lire le fichier": {
+      "main": [
+        [
+          {
+            "node": "Indexer (POST /ingest)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Rapport de chantier ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Indexer (POST /ingest)": {
+      "main": [
+        [
+          {
+            "node": "Notifier : document indexé",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notifier : échec d'indexation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rapport de chantier ?": {
+      "main": [
+        [
+          {
+            "node": "Synthétiser (POST /summarize/file)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Synthétiser (POST /summarize/file)": {
+      "main": [
+        [
+          {
+            "node": "Notifier : synthèse du rapport",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris"
+  },
+  "active": false,
+  "tags": [],
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

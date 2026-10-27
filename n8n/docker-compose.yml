@@ -1,0 +1,27 @@
+# n8n pour l'ingestion automatique des documents (voir n8n/README.md).
+# Lancement depuis la racine du projet :  docker compose -f n8n/docker-compose.yml up -d
+# Interface : http://localhost:5678
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Europe/Paris
+      - TZ=Europe/Paris
+      # n8n 2.x désactive par défaut le nœud « Local File Trigger » : on le réactive
+      # en ne laissant exclu que « Execute Command » (inutile ici, et risqué).
+      - NODES_EXCLUDE=["n8n-nodes-base.executeCommand"]
+      # n8n 2.x limite l'accès aux fichiers : on autorise uniquement le dossier d'arrivée.
+      - N8N_RESTRICT_FILE_ACCESS_TO=/data/inbox
+    volumes:
+      - n8n_data:/home/node/.n8n
+      # Dossier surveillé : data/inbox du projet (ignoré par Git).
+      - ../data/inbox:/data/inbox
+    extra_hosts:
+      # Permet de joindre l'API lancée sur la machine hôte (nécessaire sous Linux).
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  n8n_data:
