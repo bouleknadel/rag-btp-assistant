@@ -126,3 +126,11 @@ def test_generate_daily_reports(tmp_path: Path):
     docs = load_directory(tmp_path)
     assert len(docs) == 25
     assert all(d.metadata["doc_type"] == "rapport_journalier" for d in docs)
+
+
+def test_pdf_title_comes_from_metadata_even_if_wrapped(tmp_path: Path):
+    long_title = "Procès-verbal de réception avec réserves — Lot n° 08 Plâtrerie et cloisons"
+    path = tmp_path / "jean-moulin__pv_reception__test.pdf"
+    render_pdf(f"# {long_title}\n\nDélai de levée des réserves : 30 jours.", path)
+    docs = load_file(path)
+    assert docs[0].metadata["title"] == long_title

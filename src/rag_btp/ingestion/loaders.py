@@ -87,7 +87,10 @@ def load_file(path: Path, base_dir: Path | None = None) -> list[Document]:
     if suffix == ".pdf":
         reader = PdfReader(path)
         pages = [_clean_text(page.extract_text() or "") for page in reader.pages]
-        title = _extract_title(pages[0] if pages else "", path.stem)
+        # Le titre des métadonnées PDF est complet, alors que la 1re ligne extraite
+        # peut être coupée si le titre s'affiche sur plusieurs lignes.
+        meta_title = ((reader.metadata.title if reader.metadata else None) or "").strip()
+        title = meta_title or _extract_title(pages[0] if pages else "", path.stem)
         return [
             Document(page_content=text, metadata={**base_meta, "title": title, "page": i})
             for i, text in enumerate(pages, start=1)

@@ -111,3 +111,8 @@ def test_real_reranker_improves_ranking(tmp_path: Path):
     docs = retriever.invoke("À partir de quelle vitesse de vent faut-il arrêter la grue ?")
     assert "72 km/h" in docs[0].page_content
     assert 0.0 <= docs[0].metadata["rerank_score"] <= 1.0
+
+    # Régression : réponse située en fin de chunk (introuvable avec un modèle à 128 tokens).
+    docs = retriever.invoke("Quel est le délai de levée des réserves du lot plâtrerie ?")
+    assert docs[0].metadata["doc_type"] == "pv_reception"
+    assert "30 jours" in docs[0].page_content

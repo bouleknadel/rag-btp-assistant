@@ -59,7 +59,10 @@ class Settings(BaseSettings):
     gemini_thinking_level: Literal["minimal", "low", "medium", "high"] = "low"
 
     # --- Embeddings & reranking ----------------------------------------------
-    embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    embedding_model: str = "intfloat/multilingual-e5-small"
+    # Préfixes attendus par les modèles E5 (laisser vide pour un autre modèle).
+    embedding_query_prefix: str = "query: "
+    embedding_passage_prefix: str = "passage: "
     reranker_model: str = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
 
     # --- Vector store ---------------------------------------------------------
