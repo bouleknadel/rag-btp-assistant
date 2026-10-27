@@ -29,6 +29,13 @@ markers = [
     "integration: tests nécessitant les modèles locaux (embeddings / reranker)",
 ]
 
+[tool.coverage.run]
+source = ["rag_btp"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
