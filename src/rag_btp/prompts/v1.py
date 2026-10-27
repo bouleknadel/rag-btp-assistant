@@ -41,3 +41,10 @@ ANSWER_PROMPT = ChatPromptTemplate.from_messages(
         ("human", "Contexte :\n{context}\n\nQuestion : {question}"),
     ]
 )
+
+SUMMARY_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        ("system", "Résume ce rapport de chantier en quelques points clés."),
+        ("human", "{report}"),
+    ]
+)

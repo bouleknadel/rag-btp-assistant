@@ -47,6 +47,7 @@ class RAGState(TypedDict, total=False):
     attempts: int
     documents: list[Document]
     relevant_documents: list[Document]
+    grade_raw: str
     answer: str
     sources: list[dict[str, Any]]
     status: Literal["answered", "not_found"]
@@ -65,7 +66,11 @@ def format_context(documents: list[Document]) -> str:
 
 
 def parse_relevant_indices(text: str, n_documents: int) -> list[int] | None:
-    """Extrait la liste des numéros pertinents de la réponse JSON du LLM.
+    """Extrait les numéros des extraits pertinents de la réponse JSON du LLM.
+
+    Formats acceptés :
+    - v1 / v2 : ``{"pertinents": [1, 3]}`` ;
+    - v3      : ``{"evaluations": [{"extrait": 1, "raison": "...", "pertinent": true}]}``.
 
     Retourne ``None`` si la réponse est illisible (le graphe garde alors tous les documents).
     """
@@ -74,9 +79,16 @@ def parse_relevant_indices(text: str, n_documents: int) -> list[int] | None:
         return None
     try:
         data = json.loads(match.group(0))
-        values = data.get("pertinents", data.get("relevant", []))
+        if "evaluations" in data:
+            values = [
+                e["extrait"]
+                for e in data["evaluations"]
+                if e.get("pertinent") is True or str(e.get("pertinent")).lower() == "true"
+            ]
+        else:
+            values = data.get("pertinents", data.get("relevant", []))
         indices = sorted({int(v) for v in values})
-    except (ValueError, TypeError, AttributeError):
+    except (ValueError, TypeError, AttributeError, KeyError):
         return None
     return [i for i in indices if 1 <= i <= n_documents]
 
@@ -132,8 +144,8 @@ def build_rag_graph(
         indices = parse_relevant_indices(response, len(documents))
         if indices is None:
             logger.warning("Réponse de pertinence illisible, documents conservés : %r", response)
-            return {"relevant_documents": documents}
-        return {"relevant_documents": [documents[i - 1] for i in indices]}
+            return {"relevant_documents": documents, "grade_raw": response}
+        return {"relevant_documents": [documents[i - 1] for i in indices], "grade_raw": response}
 
     def route_after_grade(state: RAGState) -> str:
         if state.get("relevant_documents"):

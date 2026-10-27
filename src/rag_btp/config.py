@@ -79,6 +79,8 @@ class Settings(BaseSettings):
     # --- Graphe RAG ---------------------------------------------------------------
     # Nombre maximal de reformulations de la question si aucun document n'est pertinent.
     max_query_rewrites: int = 1
+    # Version des prompts (src/rag_btp/prompts/vN.py).
+    prompt_version: Literal["v1", "v2", "v3"] = "v3"
 
     # --- LangSmith --------------------------------------------------------------
     langsmith_tracing: bool = False
