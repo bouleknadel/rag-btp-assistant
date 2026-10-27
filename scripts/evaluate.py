@@ -207,4 +207,11 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        # Les traces LangSmith partent en arrière-plan : on attend la fin de leur envoi
+        # avant de quitter, sinon les dernières seraient perdues.
+        from langchain_core.tracers.langchain import wait_for_all_tracers
+
+        wait_for_all_tracers()

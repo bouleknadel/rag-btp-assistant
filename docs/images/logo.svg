@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" font-family="'Segoe UI', Inter, 'Helvetica Neue', Arial, sans-serif"><g transform="translate(0 0) scale(1)">
+  <rect width="256" height="256" rx="56" fill="#1E2A3A"/>
+  <path d="M74 104 h86 l26 26 v92 a8 8 0 0 1 -8 8 h-104 a8 8 0 0 1 -8 -8 v-110 a8 8 0 0 1 8 -8z" fill="#FFFFFF"/>
+  <path d="M160 104 v20 a6 6 0 0 0 6 6 h20z" fill="#C9D3DF"/>
+  <rect x="86" y="150" width="72" height="9" rx="4.5" fill="#B7C2CF"/>
+  <rect x="86" y="170" width="86" height="9" rx="4.5" fill="#B7C2CF"/>
+  <rect x="86" y="190" width="58" height="9" rx="4.5" fill="#E8761C"/>
+  <path d="M70 108 a58 50 0 0 1 116 0z" fill="#E8761C"/>
+  <rect x="121" y="56" width="14" height="52" rx="7" fill="#C45E10"/>
+  <rect x="56" y="102" width="144" height="16" rx="8" fill="#E8761C"/>
+  <path d="M206 30 q4 20 22 24 q-18 4 -22 24 q-4 -20 -22 -24 q18 -4 22 -24z" fill="#2BA89F"/>
+</g></svg>

@@ -9,7 +9,12 @@ from pydantic import SecretStr
 
 from rag_btp.config import Settings
 from rag_btp.graph import NOT_FOUND_MESSAGE, answer_question, build_rag_graph
-from rag_btp.graph.rag_graph import extract_citations, format_context, parse_relevant_indices
+from rag_btp.graph.rag_graph import (
+    extract_citations,
+    format_context,
+    normalize_citations,
+    parse_relevant_indices,
+)
 from rag_btp.llm import NoLLMConfiguredError, build_chat_model, get_llm, provider_chain
 from rag_btp.prompts import get_prompts
 
@@ -186,3 +191,17 @@ def test_each_failing_provider_is_logged(caplog, monkeypatch):
     assert len(failures) == 2
     assert "groq/openai/gpt-oss-120b" in failures[0]
     assert "gemini/" in failures[1]
+
+
+def test_fullwidth_citations_are_normalized():
+    # Format observé avec gpt-oss-120b : « …le 23 avril 2026【 1】. »
+    assert normalize_citations("Réponse 2026【 1】.") == "Réponse 2026[1]."
+    assert normalize_citations("Voir【2, 3】 et 【4†L1-L5】") == "Voir[2,3] et [4]"
+    assert extract_citations(normalize_citations("Délai de 30 jours【1】.")) == {1}
+
+
+def test_graph_detects_fullwidth_citation_as_cited():
+    graph, _ = make_graph(['{"pertinents": [1]}', "Arrêt au-delà de 72 km/h【1】."])
+    result = answer_question("Vent maximal ?", graph=graph)
+    assert result.answer == "Arrêt au-delà de 72 km/h[1]."
+    assert result.sources[0]["cited"] is True

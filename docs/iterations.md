@@ -73,3 +73,47 @@ python scripts/ask.py "Quel est le délai de levée des réserves du lot plâtre
 La version active se choisit avec `PROMPT_VERSION` dans `.env` (défaut : v3) ou
 `--prompt-version` en ligne de commande. Le gain de chaque version est mesuré par le
 script d'évaluation (taux de pertinence sur le dataset de questions/réponses).
+
+## Itération 3 — Évaluation : citations non détectées
+
+### Symptôme
+
+Lors de la première évaluation (prompts v1), le taux de pertinence est de 93,5 % mais le
+taux de « document attendu cité » n'est que de 64,3 %, alors que le document attendu est
+retrouvé dans 100 % des cas.
+
+### Diagnostic
+
+L'inspection des réponses brutes du modèle `openai/gpt-oss-120b` montre qu'il cite souvent
+ses sources avec des crochets pleine chasse : `…au plus tard le 23 avril 2026【 1】.`
+L'extraction des citations ne reconnaissait que `[1]` : ces sources étaient donc
+comptées comme « non citées ». Le problème venait de la **mesure**, pas du modèle.
+
+### Correction
+
+`normalize_citations()` convertit `【1】`, `【 1】`, `【2, 3】` et `【4†L1-L5】` en `[1]`,
+`[2,3]`, `[4]` avant l'extraction des citations ; la réponse renvoyée à l'utilisateur est
+elle aussi normalisée.
+
+### Vérification
+
+- `tests/test_graph.py::test_fullwidth_citations_are_normalized`
+- `tests/test_graph.py::test_graph_detects_fullwidth_citation_as_cited`
+- Relancer `python scripts/evaluate.py` pour mesurer le taux de citation corrigé.
+
+## Itération 4 — Observabilité : traces LangSmith perdues
+
+### Symptôme
+
+Avec le tracing activé, aucune trace n'apparaît dans LangSmith après `scripts/ask.py`.
+
+### Diagnostic
+
+Deux causes : le compte LangSmith est hébergé dans la région **UE** alors que l'endpoint
+configuré était celui des États-Unis ; et les traces sont envoyées en arrière-plan, un
+script court peut se terminer avant la fin de l'envoi.
+
+### Correction
+
+`LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com` pour un compte UE (documenté dans
+`.env.example`), et appel à `wait_for_all_tracers()` à la fin de `ask.py` et `evaluate.py`.

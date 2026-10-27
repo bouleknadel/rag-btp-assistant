@@ -93,6 +93,18 @@ def parse_relevant_indices(text: str, n_documents: int) -> list[int] | None:
     return [i for i in indices if 1 <= i <= n_documents]
 
 
+_FULLWIDTH_CITATION = re.compile(r"【\s*(\d+(?:\s*[,;]\s*\d+)*)[^】]*】")
+
+
+def normalize_citations(answer: str) -> str:
+    """Convertit les citations « 【1】 » / « 【1†L3】 » en « [1] ».
+
+    Certains modèles (gpt-oss notamment) citent avec des crochets pleine chasse :
+    sans normalisation, ces citations ne seraient pas détectées (voir docs/iterations.md).
+    """
+    return _FULLWIDTH_CITATION.sub(lambda m: f"[{m.group(1).replace(' ', '')}]", answer)
+
+
 def extract_citations(answer: str) -> set[int]:
     """Numéros cités dans la réponse : [1], [2, 3], [1][4]…"""
     cited: set[int] = set()
@@ -165,6 +177,7 @@ def build_rag_graph(
         answer = chain.invoke(
             {"question": state["question"], "context": format_context(documents)}
         ).strip()
+        answer = normalize_citations(answer)
         cited = extract_citations(answer)
         sources = [source_info(i, doc, cited) for i, doc in enumerate(documents, start=1)]
         return {"answer": answer, "sources": sources, "status": "answered"}
