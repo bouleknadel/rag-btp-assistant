@@ -9,6 +9,7 @@ from langchain_chroma import Chroma
 from rag_btp.config import get_settings
 from rag_btp.indexing.vector_store import (
     IndexingReport,
+    IndexModelMismatchError,
     collection_count,
     get_vector_store,
     index_chunks,
@@ -45,6 +46,7 @@ def index_files(paths: list[Path], base_dir: Path, store: Chroma) -> IndexingRep
 
 
 __all__ = [
+    "IndexModelMismatchError",
     "index_files",
     "IndexingReport",
     "collection_count",

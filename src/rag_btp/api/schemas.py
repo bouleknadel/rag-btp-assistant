@@ -17,6 +17,7 @@ class HealthResponse(BaseModel):
     documents_indexed: int = Field(description="Nombre de chunks dans ChromaDB")
     llm_providers: list[str] = Field(description="Fournisseur principal puis fallbacks")
     prompt_version: str
+    langsmith_tracing: bool = Field(description="Traces envoyées à LangSmith")
     embedding_model: str
     reranker_model: str
 

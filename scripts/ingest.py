@@ -15,7 +15,8 @@ import time
 from pathlib import Path
 
 from rag_btp.config import get_settings
-from rag_btp.indexing import get_vector_store, index_directory
+from rag_btp.indexing import IndexModelMismatchError, get_vector_store, index_directory
+from rag_btp.indexing.vector_store import delete_collection
 
 
 def main() -> None:
@@ -33,7 +34,14 @@ def main() -> None:
     print(f"Modèle d'embeddings : {settings.embedding_model}")
     print(f"Collection Chroma   : {settings.chroma_collection} ({settings.chroma_persist_dir})")
     start = time.perf_counter()
-    store = get_vector_store()
+    try:
+        store = get_vector_store()
+    except IndexModelMismatchError as exc:
+        if not args.reset:
+            raise SystemExit(f"\n{exc}") from exc
+        # --reset : on repart d'une collection neuve, enregistrée avec le modèle courant.
+        delete_collection(settings)
+        store = get_vector_store()
     report = index_directory(args.dir, store=store, reset=args.reset)
     elapsed = time.perf_counter() - start
 

@@ -52,12 +52,46 @@ def get_vector_store(
     client = chromadb.PersistentClient(
         path=str(path), settings=ChromaSettings(anonymized_telemetry=False)
     )
-    return Chroma(
+    model = embedding_model_name(embeddings)
+    store = Chroma(
         client=client,
         collection_name=collection_name or settings.chroma_collection,
         embedding_function=embeddings,
-        collection_metadata={"hnsw:space": "cosine"},
+        # Le nom du modèle est enregistré à la création de la collection (et conservé
+        # par Chroma), ce qui permet de détecter un index construit avec un autre modèle.
+        collection_metadata={"hnsw:space": "cosine", "embedding_model": model},
     )
+    check_index_model(store, model)
+    return store
+
+
+class IndexModelMismatchError(RuntimeError):
+    """L'index a été construit avec un autre modèle d'embeddings que celui configuré."""
+
+
+def embedding_model_name(embeddings: Embeddings) -> str:
+    return getattr(embeddings, "model_name", None) or type(embeddings).__name__
+
+
+def check_index_model(store: Chroma, model: str) -> None:
+    """Vérifie que l'index a été construit avec le modèle d'embeddings courant.
+
+    Deux modèles différents peuvent produire des vecteurs de même dimension : sans
+    cette vérification, la recherche renverrait des résultats faux sans aucune erreur.
+    """
+    indexed_with = (store._collection.metadata or {}).get("embedding_model")
+    if indexed_with is None:
+        if collection_count(store) > 0:
+            logger.warning(
+                "Index construit sans trace du modèle d'embeddings : en cas de résultats "
+                "incohérents, relancez `python scripts/ingest.py --reset`."
+            )
+        return
+    if indexed_with != model:
+        raise IndexModelMismatchError(
+            f"L'index ChromaDB a été construit avec « {indexed_with} » mais le modèle "
+            f"configuré est « {model} ». Relancez : python scripts/ingest.py --reset"
+        )
 
 
 def collection_count(store: Chroma) -> int:
@@ -88,6 +122,16 @@ def index_chunks(chunks: list[Document], store: Chroma) -> IndexingReport:
 
     report.total_in_collection = collection_count(store)
     return report
+
+
+def delete_collection(settings=None) -> None:
+    """Supprime la collection configurée (utilisé pour reconstruire l'index)."""
+    settings = settings or get_settings()
+    client = chromadb.PersistentClient(
+        path=str(settings.chroma_persist_dir), settings=ChromaSettings(anonymized_telemetry=False)
+    )
+    if settings.chroma_collection in [c.name for c in client.list_collections()]:
+        client.delete_collection(settings.chroma_collection)
 
 
 def reset_collection(store: Chroma) -> None:

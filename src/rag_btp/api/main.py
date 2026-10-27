@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile, status
+from fastapi.responses import RedirectResponse
 
 from rag_btp import __version__
 from rag_btp.api.schemas import (
@@ -27,6 +28,7 @@ from rag_btp.api.schemas import (
     SummarizeResponse,
 )
 from rag_btp.api.services import Services
+from rag_btp.evaluation.tracing import tracing_enabled
 from rag_btp.graph import answer_question
 from rag_btp.indexing import collection_count, index_directory, index_files
 from rag_btp.ingestion import SUPPORTED_EXTENSIONS, load_file
@@ -105,6 +107,10 @@ async def _save_upload(upload: UploadFile, directory: Path, max_bytes: int) -> P
 
 
 def _register_routes(app: FastAPI) -> None:
+    @app.get("/", include_in_schema=False)
+    def root() -> RedirectResponse:
+        return RedirectResponse(url="/docs")
+
     @app.get("/health", response_model=HealthResponse, tags=["système"])
     def health(services: ServicesDep) -> HealthResponse:
         """État du service : index, fournisseurs LLM, modèles et version des prompts."""
@@ -114,6 +120,7 @@ def _register_routes(app: FastAPI) -> None:
             documents_indexed=collection_count(services.store),
             llm_providers=services.llm_providers,
             prompt_version=settings.prompt_version,
+            langsmith_tracing=tracing_enabled(),
             embedding_model=settings.embedding_model,
             reranker_model=settings.reranker_model,
         )

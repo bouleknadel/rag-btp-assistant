@@ -1,0 +1,238 @@
+{
+  "name": "rag-btp-eval",
+  "version": 1,
+  "description": "Questions / réponses de référence sur le corpus de démonstration (documents BTP synthétiques). Catégories : factuel (réponse dans un document), evolution (valeur mise à jour entre deux documents), hors_corpus (l'assistant doit répondre qu'il n'a pas trouvé l'information).",
+  "examples": [
+    {
+      "id": "q01",
+      "question": "À partir de quelle vitesse de vent faut-il arrêter la grue à tour ?",
+      "reference": "La grue doit être arrêtée lorsque le vent dépasse 72 km/h, avec mise en girouette en fin de poste.",
+      "sources": ["tilleuls__securite__ppsps-extrait.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q02",
+      "question": "Quel est le délai de levée des réserves du lot plâtrerie ?",
+      "reference": "30 jours à compter de la réception du 24 mars 2026, soit au plus tard le 23 avril 2026.",
+      "sources": ["jean-moulin__pv_reception__lot-08-platrerie.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q03",
+      "question": "Combien de réserves ont été émises à la réception du lot plâtrerie de l'école Jean Moulin ?",
+      "reference": "7 réserves (R1 à R7).",
+      "sources": ["jean-moulin__pv_reception__lot-08-platrerie.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q04",
+      "question": "Quelle est la résistance moyenne à 28 jours du béton de la dalle haute du R+2 ?",
+      "reference": "34,5 MPa en moyenne, conforme à la classe C25/30 (fck = 25 MPa).",
+      "sources": ["tilleuls__essais__resistance-beton-dalle-r2.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q05",
+      "question": "Quels sont les résultats des essais à 7 jours sur les voiles du R+2 ?",
+      "reference": "27,9 MPa ; 28,4 MPa ; 27,5 MPa, soit une moyenne de 27,9 MPa (béton C30/37).",
+      "sources": ["tilleuls__essais__resistance-beton-dalle-r2.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q06",
+      "question": "Quelle classe de béton est prescrite pour les fondations de la résidence Les Tilleuls ?",
+      "reference": "Béton C25/30, classe d'exposition XC2, pour les semelles et longrines.",
+      "sources": ["tilleuls__cctp__lot-02-gros-oeuvre.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q07",
+      "question": "Quel enrobage des armatures est exigé pour les éléments au contact du sol ?",
+      "reference": "50 mm d'enrobage nominal pour les éléments au contact du sol.",
+      "sources": ["tilleuls__cctp__lot-02-gros-oeuvre.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q08",
+      "question": "À quelle fréquence faut-il prélever des éprouvettes de béton ?",
+      "reference": "3 éprouvettes par tranche de 50 m³ coulés, avec au minimum un prélèvement par jour de coulage et par classe de béton.",
+      "sources": ["tilleuls__cctp__lot-02-gros-oeuvre.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q09",
+      "question": "En dessous de quelle température le bétonnage est-il interdit ?",
+      "reference": "Le bétonnage est interdit en dessous de 5 °C, sauf dispositions particulières validées par le maître d'œuvre (béton chaud, accélérateur de prise, protection thermique).",
+      "sources": ["tilleuls__cctp__lot-02-gros-oeuvre.pdf", "tilleuls__fiche_technique__beton-c25-30-xc2.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q10",
+      "question": "À quelle profondeur se trouve la nappe phréatique sur le terrain des Tilleuls ?",
+      "reference": "6,20 m sous le terrain naturel (mesure du 12 septembre 2025) ; niveau des plus hautes eaux estimé à 5,40 m.",
+      "sources": ["tilleuls__geotechnique__synthese-etude-g2-avp.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q11",
+      "question": "Quelle contrainte admissible à l'ELS l'étude géotechnique retient-elle pour les fondations ?",
+      "reference": "0,35 MPa à l'ELS (0,50 MPa à l'ELU), fondations ancrées dans les graves sablo-limoneuses.",
+      "sources": ["tilleuls__geotechnique__synthese-etude-g2-avp.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q12",
+      "question": "Quel volume de béton a été coulé pour la dalle haute du R+2 ?",
+      "reference": "86 m³, coulés le 26 février 2026.",
+      "sources": ["tilleuls__rapport_journalier__2026-02-26.md", "tilleuls__compte_rendu__reunion-chantier-14.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q13",
+      "question": "Quelle est la cause de la fissure sur le voile V12 ?",
+      "reference": "Un décoffrage réalisé 18 heures après le coulage alors que la température nocturne était descendue à 1 °C, aggravé par l'absence de protection thermique du voile après décoffrage.",
+      "sources": ["tilleuls__non_conformite__nc-007-fissure-voile-v12.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q14",
+      "question": "Combien a coûté la réparation de la non-conformité NC-007 et qui la paie ?",
+      "reference": "2 850 € HT, à la charge de BTP Rhodanien SAS.",
+      "sources": ["tilleuls__non_conformite__nc-007-fissure-voile-v12.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q15",
+      "question": "Quel est le retard actuel du chantier des Tilleuls ?",
+      "reference": "3 jours ouvrés selon le compte-rendu n° 15 du 11 mars 2026 (le retard était de 6 jours au compte-rendu n° 14, réduit grâce au renfort de l'équipe de coffrage).",
+      "sources": ["tilleuls__compte_rendu__reunion-chantier-15.pdf"],
+      "category": "evolution"
+    },
+    {
+      "id": "q16",
+      "question": "Quand est prévue la fin du gros œuvre aux Tilleuls ?",
+      "reference": "Le 30 avril 2026.",
+      "sources": ["tilleuls__planning__jalons-2026.md", "tilleuls__compte_rendu__reunion-chantier-15.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q17",
+      "question": "Quelle est la date prévue pour la réception des travaux de la résidence Les Tilleuls ?",
+      "reference": "Le 4 décembre 2026 (OPR du 16 au 27 novembre 2026).",
+      "sources": ["tilleuls__planning__jalons-2026.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q18",
+      "question": "Quelles observations ont été faites lors de la visite CSPS du 2 mars 2026 ?",
+      "reference": "4 observations : garde-corps manquant à la trémie d'escalier du R+3 (levée immédiatement), compagnons sans casque, bouteilles de gaz stockées couchées au pied de la grue, accès à la base de la grue non balisé.",
+      "sources": ["tilleuls__securite__visite-csps-2026-03-02.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q19",
+      "question": "Que s'est-il passé lors du presqu'accident du 5 mars 2026 ?",
+      "reference": "Un serre-joint d'environ 2 kg est tombé de la plateforme de travail du R+3 sur la zone de circulation piétonne, sans blessé ni dégât.",
+      "sources": ["tilleuls__incident__presquaccident-chute-objet-2026-03-05.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q20",
+      "question": "Quelles mesures ont été prises après la chute du serre-joint ?",
+      "reference": "Pose de plinthes sur toutes les plateformes, balisage de la zone de circulation, arrêt d'une heure, quart d'heure sécurité le 6 mars, contrôle quotidien des plinthes, interdiction de stocker du matériel à moins de 1 m du bord.",
+      "sources": ["tilleuls__incident__presquaccident-chute-objet-2026-03-05.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q21",
+      "question": "Qui sont les sauveteurs secouristes du travail sur le chantier des Tilleuls ?",
+      "reference": "M. Thomas Leroy et M. Antoine Morel.",
+      "sources": ["tilleuls__securite__ppsps-extrait.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q22",
+      "question": "Quelle épaisseur et quelle conductivité thermique pour l'isolant de l'ITE ?",
+      "reference": "Laine de roche de 140 mm, conductivité λ = 0,036 W/(m·K), soit R = 3,85 m²·K/W.",
+      "sources": ["tilleuls__fiche_technique__isolant-ite-laine-de-roche.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q23",
+      "question": "Combien de chevilles par m² faut-il pour fixer les panneaux d'ITE ?",
+      "reference": "6 chevilles par m² en partie courante et 8 chevilles par m² en zones de rive.",
+      "sources": ["tilleuls__fiche_technique__isolant-ite-laine-de-roche.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q24",
+      "question": "Combien de temps dure l'essai de mise en eau de la toiture-terrasse ?",
+      "reference": "48 heures, sur la totalité de la surface, avant la pose de la protection.",
+      "sources": ["tilleuls__fiche_technique__etancheite-toiture-terrasse.txt"],
+      "category": "factuel"
+    },
+    {
+      "id": "q25",
+      "question": "Quelle performance thermique est exigée pour les fenêtres de l'extension de l'école Jean Moulin ?",
+      "reference": "Uw inférieur ou égal à 1,3 W/(m²·K), avec un vitrage 4/16/4 argon (Ug = 1,1 W/(m²·K)).",
+      "sources": ["jean-moulin__cctp__lot-05-menuiseries-exterieures.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q26",
+      "question": "Quelle teinte est prévue pour les menuiseries aluminium de l'école ?",
+      "reference": "RAL 7016 (gris anthracite), thermolaquage label Qualicoat classe 2.",
+      "sources": ["jean-moulin__cctp__lot-05-menuiseries-exterieures.pdf"],
+      "category": "factuel"
+    },
+    {
+      "id": "q27",
+      "question": "Quelle essence de bois est utilisée pour le bardage de l'école ?",
+      "reference": "Du mélèze de Sibérie, sans traitement chimique (classe d'emploi 3.1).",
+      "sources": ["jean-moulin__fiche_technique__bardage-bois-meleze.txt"],
+      "category": "factuel"
+    },
+    {
+      "id": "q28",
+      "question": "Quand le chauffage de l'extension Jean Moulin a-t-il été mis en service ?",
+      "reference": "Le 10 mars 2026 (pompe à chaleur air/eau).",
+      "sources": ["jean-moulin__rapport_hebdo__semaine-11.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q29",
+      "question": "Quand sont prévues les opérations préalables à la réception (OPR) de l'école Jean Moulin ?",
+      "reference": "Le 23 mars 2026, pour une réception visée le 3 avril 2026.",
+      "sources": ["jean-moulin__compte_rendu__reunion-chantier-22.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q30",
+      "question": "Quel est le délai maximal de mise en œuvre du béton C25/30 après sa fabrication ?",
+      "reference": "1 h 30 après la fabrication (heure du bon de livraison) ; tout ajout d'eau sur chantier est interdit.",
+      "sources": ["tilleuls__fiche_technique__beton-c25-30-xc2.md"],
+      "category": "factuel"
+    },
+    {
+      "id": "q31",
+      "question": "Quelle est la couleur des volets de la résidence Les Tilleuls ?",
+      "reference": "Information absente des documents : l'assistant doit répondre qu'il ne l'a pas trouvée.",
+      "sources": [],
+      "category": "hors_corpus"
+    },
+    {
+      "id": "q32",
+      "question": "Quel est le budget total des travaux de l'extension de l'école Jean Moulin ?",
+      "reference": "Information absente des documents : l'assistant doit répondre qu'il ne l'a pas trouvée.",
+      "sources": [],
+      "category": "hors_corpus"
+    },
+    {
+      "id": "q33",
+      "question": "Combien de places de stationnement vélo sont prévues à la résidence Les Tilleuls ?",
+      "reference": "Information absente des documents : l'assistant doit répondre qu'il ne l'a pas trouvée.",
+      "sources": [],
+      "category": "hors_corpus"
+    }
+  ]
+}
