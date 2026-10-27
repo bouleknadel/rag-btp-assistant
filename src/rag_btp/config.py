@@ -82,6 +82,11 @@ class Settings(BaseSettings):
     # Version des prompts (src/rag_btp/prompts/vN.py).
     prompt_version: Literal["v1", "v2", "v3"] = "v3"
 
+    # --- API ------------------------------------------------------------------------
+    # Sous-dossier de data/raw où sont enregistrés les fichiers envoyés à POST /ingest.
+    upload_subdir: str = "uploads"
+    max_upload_mb: int = 20
+
     # --- LangSmith --------------------------------------------------------------
     langsmith_tracing: bool = False
     langsmith_project: str = "rag-btp-assistant"
